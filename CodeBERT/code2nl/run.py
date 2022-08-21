@@ -41,7 +41,7 @@ from torch.utils.data.distributed import DistributedSampler
 from transformers import (WEIGHTS_NAME, AdamW, get_linear_schedule_with_warmup,
                           RobertaConfig, RobertaModel, RobertaTokenizer)
 MODEL_CLASSES = {'roberta': (RobertaConfig, RobertaModel, RobertaTokenizer)}
-
+tokenizer = CTokenizer()  # use c tokenizer
 logging.basicConfig(format = '%(asctime)s - %(levelname)s - %(name)s -   %(message)s',
                     datefmt = '%m/%d/%Y %H:%M:%S',
                     level = logging.INFO)
@@ -65,7 +65,6 @@ def extractTokens(ast):
     return tokens
 
 def codeToTokens(code):
-    global parser
     tokens = tokenizer.tokenize(code)
     tokens = extractTokens(tokens)
     return tokens
