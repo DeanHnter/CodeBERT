@@ -83,15 +83,16 @@ def read_examples(filename):
                 code = ' '.join( codeToTokens(js['code'])).replace('\n', ' ')
                 code = ' '.join(code.strip().split())
                 words = js['nl'].split()
-                nl = ' '.join(words).replace('\n', '')
-                nl = ' '.join(nl.strip().split())
-                examples.append(
-                    Example(
-                        idx=idx,
-                        source=code,
-                        target=nl,
+                if len(words)>2:
+                    nl = ' '.join(words).replace('\n', '')
+                    nl = ' '.join(nl.strip().split())
+                    examples.append(
+                        Example(
+                            idx=idx,
+                            source=code,
+                            target=nl,
+                        )
                     )
-                )
             except Exception as e:
                 continue
     return examples
