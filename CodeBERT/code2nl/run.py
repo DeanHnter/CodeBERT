@@ -35,6 +35,7 @@ from itertools import cycle
 import torch.nn as nn
 from model import Seq2Seq
 from tqdm import tqdm, trange
+from sctokenizer import CTokenizer
 from torch.utils.data import DataLoader, Dataset, SequentialSampler, RandomSampler,TensorDataset
 from torch.utils.data.distributed import DistributedSampler
 from transformers import (WEIGHTS_NAME, AdamW, get_linear_schedule_with_warmup,
@@ -57,26 +58,43 @@ class Example(object):
         self.source = source
         self.target = target
 
+def extractTokens(ast):
+    tokens = []
+    for token in ast:
+        tokens.append(token.token_value)
+    return tokens
+
+def codeToTokens(code):
+    global parser
+    tokens = tokenizer.tokenize(code)
+    tokens = extractTokens(tokens)
+    return tokens
+
+
 def read_examples(filename):
     """Read examples from filename."""
-    examples=[]
-    with open(filename,encoding="utf-8") as f:
+    examples = []
+    with open(filename, encoding="utf-8") as f:
         for idx, line in enumerate(f):
-            line=line.strip()
-            js=json.loads(line)
+            line = line.strip()
+            js = json.loads(line)
             if 'idx' not in js:
-                js['idx']=idx
-            code=' '.join(js['code_tokens']).replace('\n',' ')
-            code=' '.join(code.strip().split())
-            nl=' '.join(js['docstring_tokens']).replace('\n','')
-            nl=' '.join(nl.strip().split())            
-            examples.append(
-                Example(
-                        idx = idx,
+                js['idx'] = idx
+            try:
+                code = ' '.join( codeToTokens(js['code'])).replace('\n', ' ')
+                code = ' '.join(code.strip().split())
+                words = js['nl'].split()
+                nl = ' '.join(words).replace('\n', '')
+                nl = ' '.join(nl.strip().split())
+                examples.append(
+                    Example(
+                        idx=idx,
                         source=code,
-                        target = nl,
-                        ) 
-            )
+                        target=nl,
+                    )
+                )
+            except Exception as e:
+                continue
     return examples
 
 
